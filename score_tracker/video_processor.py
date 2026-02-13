@@ -3,9 +3,30 @@ Video processing module.
 Extracts frames from MP4 at configurable intervals (time-based or frame-based).
 """
 
+import os
 import cv2
 from pathlib import Path
 from typing import Generator, Tuple, Union
+
+
+def _read_frame_quiet(cap) -> Tuple[bool, "cv2.Mat"]:
+    """Read a frame while suppressing FFmpeg H.264 NAL warnings on stderr."""
+    try:
+        stderr_fd = 2
+        devnull = open(os.devnull, "w")
+        saved_stderr = os.dup(stderr_fd)
+        os.dup2(devnull.fileno(), stderr_fd)
+    except OSError:
+        return cap.read()
+    try:
+        return cap.read()
+    finally:
+        try:
+            os.dup2(saved_stderr, stderr_fd)
+            os.close(saved_stderr)
+            devnull.close()
+        except OSError:
+            pass
 
 
 def extract_frames(
@@ -47,17 +68,18 @@ def extract_frames(
     start_frame = int(start_time * fps)
     end_frame = int(end_time * fps) if end_time is not None else total_frames
 
-    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
-    frame_idx = start_frame
+    # Read sequentially (no seeking) to avoid H.264 NAL unit errors
+    next_yield_frame = start_frame
+    frame_idx = 0
 
     while frame_idx < end_frame:
-        ret, frame = cap.read()
+        ret, frame = _read_frame_quiet(cap)
         if not ret:
             break
-
-        timestamp = frame_idx / fps
-        yield frame_idx, timestamp, frame
-        frame_idx += interval_frame_count
-        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+        if frame_idx >= next_yield_frame:
+            timestamp = frame_idx / fps
+            yield frame_idx, timestamp, frame
+            next_yield_frame += interval_frame_count
+        frame_idx += 1
 
     cap.release()

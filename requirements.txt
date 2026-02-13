@@ -1,0 +1,15 @@
+# Video & Image
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Text Detection (OCR) - EasyOCR avoids PaddlePaddle compatibility issues
+easyocr>=1.7.0
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Optional: YOLO for text-region detection
+# ultralytics>=8.0.0
+
+# Future: LLM
+# openai>=1.0.0
+# anthropic>=0.18.0

@@ -7,8 +7,8 @@ easyocr>=1.7.0
 torch>=2.0.0
 torchvision>=0.15.0
 
-# Optional: YOLO for text-region detection
-# ultralytics>=8.0.0
+# YOLO for text/overlay region detection
+ultralytics>=8.0.0
 
 # Future: LLM
 # openai>=1.0.0

@@ -36,7 +36,7 @@ MAN UNITED 2 - 1 LIVERPOOL
 ```
 score_tracker/
 ├── video_processor.py   # MP4 → frame extraction
-├── text_detector.py     # EasyOCR for overlay text (YOLO optional)
+├── text_detector.py     # YOLO region detection + EasyOCR
 ├── storage.py           # Write to txt with delimiter
 ├── llm_client.py        # Stub for future LLM integration
 ├── pipeline.py          # Orchestrates the flow
@@ -73,3 +73,6 @@ python main.py match.mp4 -o scores.txt --start 0 --end 300
 | `--interval-frames` | 30 | Extract 1 frame every N frames |
 | `--start` | 0 | Start time (sec) |
 | `--end` | full | End time (sec) |
+| `--yolo-model` | keremberke/yolov8n-table-extraction | YOLO model for region detection |
+| `--no-yolo` | - | Full-frame OCR (includes stadium ads) |
+| `--overlay-zones-only` | - | Only top/bottom 25% of frame (reduces ads) |
